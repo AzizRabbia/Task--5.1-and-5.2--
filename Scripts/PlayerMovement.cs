@@ -5,17 +5,28 @@ using TMPro;
 
 public class PlayerMovement : MonoBehaviour
 {
+    public List<GameObject> bonus;
     private float speed = 5f;
     private Rigidbody2D playerRb;
     private Animator anim;
     public TextMeshProUGUI scoreText;
     private int score;
+    public GameObject prefab;
+    private float spawnRate = 5f;//spawn every one second
+    public TextMeshProUGUI gameOverText;
     // Start is called before the first frame update
     void Start()
     {
         playerRb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
+        SpawnFruits();
         score = 0;
+    }
+
+    void SpawnFruits() 
+    {
+        StartCoroutine(SpawnTarget());
+        //  Instantiate(prefab, new Vector3(0,Random.Range(9,-9),0),prefab.transform.rotation);
     }
 
     // Update is called once per frame
@@ -74,11 +85,39 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag ("Tile") ) // when player collide with tile 5 score is added 
+        if (collision.gameObject.CompareTag("fruit1")) // when player collide with fruit 1, 5 score is added 
         {
             UpdateScore();
-        
+            Destroy(collision.gameObject);
         }
+        if(collision.gameObject.CompareTag("fruit2")) 
+        {
+            UpdateScore();
+            Destroy(collision.gameObject);
+        }
+        if (collision.gameObject.CompareTag("Hurdle")) 
+        {
+            Destroy(gameObject);
+            GameOver();
+        }
+      
     }
- 
+
+    IEnumerator SpawnTarget()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(spawnRate);
+            // give randome number from list
+            int index = Random.Range(0, bonus.Count);
+            Instantiate(bonus[index],new Vector3(Random.Range(9,-9),Random.Range(9,-9)),transform.rotation); //spawn any object from prefabs
+
+        }
+
+    }
+   
+    public void GameOver()
+    {
+        gameOverText.gameObject.SetActive(true);
+    }
 }
